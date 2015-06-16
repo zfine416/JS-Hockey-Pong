@@ -10,7 +10,7 @@
 	var WIDTH=1000, HEIGHT=600, pi=Math.PI;
 	var UP=38, DOWN=40;
 	//add standard canvas variables
-	var canvas, ctx, keystate;
+	var canvas, ctx, keystate, user_score, ai_score;
 	var player, ai, ball;
 	//player object
 	player = {
@@ -36,7 +36,7 @@
 
 		update: function(){
 			var dest = ball.y - (this.height - ball.side)/2;
-			this.y += (dest - this.y)*0.1;
+			this.y += (dest - this.y)*0.05;
 			this.y = Math.max(Math.min(this.y, HEIGHT - this.height), 0)
 		},
 		draw: function(){ctx.fillRect(this.x, this.y, this.width, this.height)
@@ -86,15 +86,21 @@
 				this.vel.y = smash * this.speed*Math.sin(phi);
 			}
 				//if passed puck then recenter 
-			if(0 > this.x+this.side || this.x > WIDTH){
-				this.serve(paddle===player ? 1 : -1)
+				if(0 > this.x+this.side || this.x > WIDTH){
+					this.serve(paddle===player ? 1 : -1);
+				}
+				if(this.x < 0){
+					ai_score=ai_score+.5;
+				}
+				if(this.x-10 > WIDTH-this.side){
+					user_score++;
+				}
+			},
+			draw: function(){ctx.fillRect(this.x, this.y, this.side, this.side)
 			}
-		},
-		draw: function(){ctx.fillRect(this.x, this.y, this.side, this.side)
-		}
-	};
+		};
 
-	function main(){
+		function main(){
 		//Create and add canvas to body
 		canvas = document.createElement("canvas");
 		canvas.width = WIDTH;
@@ -124,6 +130,8 @@
 
 	function init(){
 		//set starting positions
+		user_score = 0;
+		ai_score = 0;
 		player.x = player.width;
 		player.y = (HEIGHT - player.height)/2;
 
@@ -168,6 +176,9 @@
 		ctx.stroke();
 		ctx.fillStyle = "black";
 		ball.draw();
+		ctx.fillStyle = "#000";
+		ctx.fillText("SCORE: " + user_score, 10, canvas.height-10);
+		ctx.fillText("SCORE: " + ai_score, canvas.width-80, canvas.height-10);
 		
 		ctx.restore();
 	}
